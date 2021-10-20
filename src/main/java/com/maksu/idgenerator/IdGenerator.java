@@ -18,7 +18,6 @@ public class IdGenerator {
     private static final long maxNodeId = (1L << NODE_ID_BITS) - 1;
     private static final long maxSequence = (1L << SEQUENCE_BITS) - 1;
 
-    // Custom Epoch (January 1, 2015 Midnight UTC = 2015-01-01T00:00:00Z)
     private static final long DEFAULT_CUSTOM_EPOCH = 1420070400000L;
 
     private final long nodeId;
@@ -36,7 +35,6 @@ public class IdGenerator {
         return idGenerator;
     }
 
-    // Let Snowflake generate a nodeId
     private IdGenerator() {
         this.nodeId = createNodeId();
         this.customEpoch = DEFAULT_CUSTOM_EPOCH;
@@ -52,11 +50,9 @@ public class IdGenerator {
         if (currentTimestamp == lastTimestamp) {
             sequence = (sequence + 1) & maxSequence;
             if(sequence == 0) {
-                // Sequence Exhausted, wait till next millisecond.
                 currentTimestamp = waitNextMillis(currentTimestamp);
             }
         } else {
-            // reset sequence to start with zero for the next millisecond
             sequence = 0;
         }
 
@@ -66,14 +62,11 @@ public class IdGenerator {
                 | (nodeId << SEQUENCE_BITS)
                 | sequence;
     }
-
-
-    // Get current timestamp in milliseconds, adjust for the custom epoch.
+    
     private long timestamp() {
         return Instant.now().toEpochMilli() - customEpoch;
     }
 
-    // Block and wait till next millisecond
     private long waitNextMillis(long currentTimestamp) {
         while (currentTimestamp == lastTimestamp) {
             currentTimestamp = timestamp();
